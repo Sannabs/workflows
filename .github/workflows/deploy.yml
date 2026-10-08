@@ -1,0 +1,40 @@
+name: Deploy
+
+# Called by each app's ci.yml after its own tests pass. Holds no secrets or
+# hostnames: the caller passes them in, and the droplet's forced command decides
+# what the commit SHA deploys.
+on:
+  workflow_call:
+    secrets:
+      DEPLOY_SSH_KEY:
+        required: true
+      DEPLOY_KNOWN_HOSTS:
+        required: true
+      DEPLOY_HOST:
+        required: true
+      DEPLOY_USER:
+        required: true
+
+permissions: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      # GITHUB_SHA is the caller's commit; the forced command runs boot.sh <sha>
+      - name: Deploy
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: ssh -o BatchMode=yes "$DEPLOY_USER@$DEPLOY_HOST" "$GITHUB_SHA"
