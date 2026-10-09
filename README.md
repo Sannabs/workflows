@@ -21,4 +21,5 @@ SSHes to a droplet with a key locked by a forced command to `boot.sh <sha>`, sen
       DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
 ```
 
-Pin callers to a tag. A breaking change gets a new major tag (`v2`), never a moved `v1`.
+Callers pin to the major tag `v1`. Each release also gets an exact tag (`v1.0.0`, `v1.1.0`) that never moves.
+A compatible change moves `v1` forward to the new exact tag, so every caller picks it up; a breaking change starts `v2`.

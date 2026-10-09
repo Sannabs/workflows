@@ -22,6 +22,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      # A secret that doesn't exist arrives as an empty string, not an error;
+      # without this, ssh just prints its usage text and exits 255
+      - name: Check secrets
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          missing=""
+          for name in DEPLOY_SSH_KEY DEPLOY_KNOWN_HOSTS DEPLOY_HOST DEPLOY_USER; do
+            [ -n "${!name}" ] || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing secrets:$missing. Run scripts/setup-deploy.sh from Sannabs/workflows for $GITHUB_REPOSITORY."
+            exit 1
+          fi
+
       - name: Configure SSH
         env:
           SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
