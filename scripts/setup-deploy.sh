@@ -89,13 +89,16 @@ refusal=$(ssh -o IdentitiesOnly=yes -o BatchMode=yes -o UserKnownHostsFile="$tmp
 # Added by hand, not `gh repo deploy-key add`: GitHub deletes keys an OAuth app
 # created when that app's authorization is revoked, which would break every deploy.
 gh_pub_body=$(cut -d' ' -f2 "$tmp/github.pub")
-if gh repo deploy-key list -R "$repo" --json key --jq '.[].key' | grep -qF "$gh_pub_body"; then
+has_deploy_key() { gh repo deploy-key list -R "$repo" --json key --jq '.[].key' | grep -qF "$gh_pub_body"; }
+if has_deploy_key; then
   echo "==> Deploy key already on $repo"
 else
   pbcopy < "$tmp/github.pub"
   open "https://github.com/$repo/settings/keys/new"
   echo "==> Deploy key copied. In the browser: Title 'droplet', paste, leave write access OFF, Add key."
-  read -r -p "    Press Enter once it's added... "
+  until read -r -p "    Press Enter once it's added... " && has_deploy_key; do
+    echo "    Not on $repo yet. Clipboard still holds it: $(cat "$tmp/github.pub")"
+  done
 fi
 
 echo "==> Checking the droplet can fetch $repo with its own key"
