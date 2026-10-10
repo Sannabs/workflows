@@ -507,8 +507,8 @@ Cause: the deploy key wasn't saved on GitHub — usually Enter pressed before cl
 Fix: the key is still on your clipboard; add it, then press Enter again.
 
 **`gh secret set … HTTP 503`**
-Cause: GitHub outage.
-Fix: set the missing one by hand: `gh secret set <NAME> -R <owner>/<repo> --body <value>`.
+Cause: GitHub's secrets service was briefly down; everything before the failing line succeeded.
+Fix: check which secrets exist with `gh secret list -R <owner>/<repo>`. If only `DEPLOY_HOST` or `DEPLOY_USER` is missing, set it by hand (`gh secret set DEPLOY_USER -R <owner>/<repo> --body <user>`). If `DEPLOY_SSH_KEY` or `DEPLOY_KNOWN_HOSTS` is missing, re-run `setup-deploy.sh` — the CI private key is never saved anywhere you could copy it from.
 
 **`gh` fails with `unexpected EOF` / `operation timed out`**
 Cause: your network.
