@@ -506,9 +506,9 @@ sudo rm /etc/apt/sources.list.d/<file>.list && sudo apt-get update
 Cause: the deploy key wasn't saved on GitHub — usually Enter pressed before clicking **Add key**.
 Fix: the key is still on your clipboard; add it, then press Enter again.
 
-**`gh secret set … HTTP 503`**
-Cause: GitHub's secrets service was briefly down; everything before the failing line succeeded.
-Fix: check which secrets exist with `gh secret list -R <owner>/<repo>`. If only `DEPLOY_HOST` or `DEPLOY_USER` is missing, set it by hand (`gh secret set DEPLOY_USER -R <owner>/<repo> --body <user>`). If `DEPLOY_SSH_KEY` or `DEPLOY_KNOWN_HOSTS` is missing, re-run `setup-deploy.sh` — the CI private key is never saved anywhere you could copy it from.
+**`gh secret set … HTTP 503` while running `setup-deploy.sh`**
+Cause: GitHub's secrets service was briefly unavailable.
+Fix: the script retries each secret three times on its own. If it still gives up, re-run it — it is safe to repeat. To see which of the four (`DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS`, `DEPLOY_HOST`, `DEPLOY_USER`) a repo has: `gh secret list -R <owner>/<repo>`.
 
 **`gh` fails with `unexpected EOF` / `operation timed out`**
 Cause: your network.

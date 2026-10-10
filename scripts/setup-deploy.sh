@@ -104,10 +104,25 @@ fi
 echo "==> Checking the droplet can fetch $repo with its own key"
 remote "git -C /var/www/$app fetch --quiet origin" || { echo "droplet fetch failed: is the deploy key added?" >&2; exit 1; }
 
+# GitHub's secrets API sometimes answers 503; retry rather than leave a repo half-configured.
+# Values come from files so each retry re-reads its input.
+set_secret() {
+  local name="$1" file="$2" attempt
+  for attempt in 1 2 3; do
+    gh secret set "$name" -R "$repo" < "$file" && return 0
+    echo "    $name failed (attempt $attempt/3), retrying..." >&2
+    sleep $((attempt * 5))
+  done
+  echo "Could not set $name on $repo. Re-run this script; it is safe to repeat." >&2
+  exit 1
+}
+
 echo "==> Setting secrets on $repo"
-gh secret set DEPLOY_SSH_KEY -R "$repo" < "$tmp/ci_key"
-gh secret set DEPLOY_KNOWN_HOSTS -R "$repo" < "$tmp/known_hosts"
-gh secret set DEPLOY_HOST -R "$repo" --body "$host"
-gh secret set DEPLOY_USER -R "$repo" --body "$user"
+printf '%s' "$host" > "$tmp/host"
+printf '%s' "$user" > "$tmp/user"
+set_secret DEPLOY_SSH_KEY "$tmp/ci_key"
+set_secret DEPLOY_KNOWN_HOSTS "$tmp/known_hosts"
+set_secret DEPLOY_HOST "$tmp/host"
+set_secret DEPLOY_USER "$tmp/user"
 
 echo "==> Done: merges to $repo's default branch now deploy /var/www/$app on $ssh_alias"
