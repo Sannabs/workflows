@@ -2,6 +2,8 @@
 
 Reusable GitHub Actions workflows. No secrets or hostnames live here; callers pass their own.
 
+**New here or doing something by hand? Start with [RUNBOOK.md](RUNBOOK.md).**
+
 ## deploy.yml
 
 SSHes to a droplet with a key locked by a forced command to `boot.sh <sha>`, sending only the commit SHA.

@@ -2,7 +2,7 @@
 # One-time CI deploy setup for one app on one droplet. Run from your Mac.
 #
 #   scripts/setup-deploy.sh <ssh-alias> <app-dir> <owner/repo>
-#   scripts/setup-deploy.sh frazercapital backend Sannabs/global-tower-backend
+#   scripts/setup-deploy.sh shop-droplet backend acme/shop-backend
 #
 # Droplet: a read-only GitHub deploy key under its own SSH alias, ~/bin/deploy.sh,
 # and a CI key locked to `deploy.sh /var/www/<app-dir>`. GitHub: the four secrets
