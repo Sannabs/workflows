@@ -8,8 +8,11 @@ Placeholders used throughout:
 - `<app>` — the app's folder under `/var/www` on the droplet (e.g. `backend`)
 - `<owner>/<repo>` — the GitHub repository (e.g. `acme/shop-backend`)
 - `<branch>` — the repo's default branch, usually `main` (some repos use `master`)
+- `<user>` — the droplet user apps run as; PM2's boot service is named `pm2-<user>`
 
 Your private inventory (which droplet runs which app, and each app's quirks) lives in a separate private repo, never here.
+
+Setting up, hardening or monitoring the droplets themselves: [DROPLET_HANDBOOK.md](DROPLET_HANDBOOK.md).
 
 ---
 
@@ -335,7 +338,7 @@ It checks the host key, creates the droplet's deploy key and CI key, proves the 
 **b. On the droplet, check who owns PM2:**
 
 ```bash
-systemctl is-enabled pm2-sanna
+systemctl is-enabled pm2-<user>
 ```
 
 **c. Save what's running, then install the new Node:**
@@ -355,7 +358,7 @@ If this fails at `apt update`, a stale third-party apt source is broken — see 
 - `enabled` → systemd owns PM2. **Never `pm2 update` here** — it kills the daemon systemd is watching, systemd then stops everything, and your apps vanish.
 
   ```bash
-  sudo systemctl restart pm2-sanna && sleep 5 && pm2 ls
+  sudo systemctl restart pm2-<user> && sleep 5 && pm2 ls
   ```
 
 - `not-found` → no service yet:
@@ -483,7 +486,7 @@ Cause: `pm2 update` was run where systemd owns PM2.
 Fix:
 
 ```bash
-pm2 kill && sudo systemctl start pm2-sanna && sleep 3 && pm2 ls
+pm2 kill && sudo systemctl start pm2-<user> && sleep 3 && pm2 ls
 ```
 
 **`pm2 ls` is empty after you log in, but the site works**
@@ -555,7 +558,7 @@ gh repo deploy-key list -R <owner>/<repo>
 ```
 
 ```bash
-ssh <alias> "pm2 ls && systemctl is-enabled pm2-sanna"
+ssh <alias> "pm2 ls && systemctl is-enabled pm2-<user>"
 ```
 
 ```bash

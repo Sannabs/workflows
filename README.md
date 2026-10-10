@@ -2,7 +2,7 @@
 
 Reusable GitHub Actions workflows. No secrets or hostnames live here; callers pass their own.
 
-**New here or doing something by hand? Start with [RUNBOOK.md](RUNBOOK.md).**
+**New here or doing something by hand? Start with [RUNBOOK.md](RUNBOOK.md)** (deploys) and **[DROPLET_HANDBOOK.md](DROPLET_HANDBOOK.md)** (the servers themselves).
 
 ## deploy.yml
 
